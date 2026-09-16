@@ -8,6 +8,7 @@ test('snapshots Session events and correlates one native model tool owner', () =
       seq: 0,
       type: 'assistant/message',
       data: {
+        stream: [],
         turn: 2,
         step: 1,
         message: {

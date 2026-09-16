@@ -45,6 +45,7 @@ test('Harness Session fork restores profile and state at the selected turn bound
       message: { id: 'writer-prompt-1', role: 'user', source: { kind: 'user' }, content: [{ type: 'text', text: '<rp_writer_prompt>第一楼层资料</rp_writer_prompt>' }] },
     }, { surfaceOp: 'append' })
     writer1.append('assistant/message', {
+      stream: [],
       turn: 1,
       step: 1,
       message: createAssistantMessage({ source: { provider: 'writer-provider', model: 'writer-model' }, content: [{ type: 'text', text: '第 1 楼层正文。' }] }),
@@ -96,6 +97,7 @@ test('Harness Session fork restores profile and state at the selected turn bound
       turn: secondAssistant.data.turn, step: secondAssistant.data.step,
     }
     parent.append('assistant/message', {
+      stream: [],
       turn: secondAssistant.data.turn,
       step: secondAssistant.data.step,
       message: createAssistantMessage({
@@ -170,6 +172,7 @@ function appendTurn(session, turn, input) {
     },
   }, { surfaceOp: 'append' })
   const assistant = session.append('assistant/message', {
+    stream: [],
     turn,
     step: 1,
     message: createAssistantMessage({

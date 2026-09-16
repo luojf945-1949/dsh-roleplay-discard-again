@@ -560,6 +560,7 @@ function committedSession(
   }
   const callId = 'committed-call'
   const assistant = session.append('assistant/message', {
+    stream: [],
     turn: 1,
     step: 1,
     message: createAssistantMessage({

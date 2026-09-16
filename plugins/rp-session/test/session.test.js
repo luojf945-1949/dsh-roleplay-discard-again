@@ -21,6 +21,7 @@ test('selected opening provenance is a stable native assistant-message discrimin
   const opening = {
     type: 'assistant/message',
     data: { message: { source: { kind: 'model', provider: 'rp-session', model: 'selected-opening' } } },
+  stream: [],
   }
   assert.equal(isSelectedOpeningMessage(opening), true)
   assert.equal(isSelectedOpeningMessage({ ...opening, type: 'user/message' }), false)
@@ -816,6 +817,7 @@ function seedOpening(session, text) {
   session.append('turn/start', { turn: 1 })
   session.append('step/start', { turn: 1, step: 1 })
   session.append('assistant/message', { turn: 1, step: 1, message }, { surfaceOp: 'append', sourceEventSeqs: [] })
+  stream: [],
   session.append('step/end', { turn: 1, step: 1 })
   session.append('turn/end', { turn: 1, reason: { kind: 'completed' } })
 }

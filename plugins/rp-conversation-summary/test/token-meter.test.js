@@ -38,6 +38,7 @@ test('compatibility metering is limited to validated Roleplay message-action ass
   session.append('turn/start', { turn: 2 })
   session.append('step/start', { turn: 2, step: 1 })
   const later = session.append('assistant/message', {
+    stream: [],
     turn: 2,
     step: 1,
     message: createAssistantMessage({
@@ -85,6 +86,7 @@ function completedAssistantSession(id, text) {
   session.append('turn/start', { turn: 1 })
   session.append('step/start', { turn: 1, step: 1 })
   session.append('assistant/message', {
+    stream: [],
     turn: 1,
     step: 1,
     message: createAssistantMessage({

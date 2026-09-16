@@ -4,6 +4,10 @@
 
 ## Unreleased
 
+- 修复 `assistant/message` 的三类会话边界契约错误，它们都只在回放、分支或截断时暴露：该事件不得携带 `sourceEventSeqs`（Harness 判定的是字段存在性，空数组同样抛错），动作载体、失败轮标记与开场白种子三处原先在写入时即失败；该事件的数据必须带 `stream` 数组，动作载体与开场白种子原先都缺失，会让整段会话日志无法重建；`surfaceOp` 的旧字段名也残留在读取侧（`event.surfaceOp.start`），使撤回判定的序号区间兜底成为死代码、历史上翻起点失效，已修 8 处源码与 6 处构建产物。`tools/adopt-surface-op.mjs` 原先只重命名字面量，`--check` 因此对读取侧误报合规，现已同时覆盖两种形态。
+- 记录当前基线的已知限制：DSH `0.1.5-rc.1` 的会话边界契约自相矛盾——替换 surface 节点必须列出全部被遮蔽节点，而 `assistant/message` 一旦携带该字段就在写入时抛错——因此**助手消息的编辑、删除与重新生成不可用**；用户消息的编辑与删除、失败轮次的重新生成不受影响。新增 `tools/check-session-contract.mjs` 用真实 `Session` 锁住契约并以 `--allow-assistant-replace-gap` 显式放行该缺口，`pnpm run check` 已接入；上游修复后门禁会直接报出「缺口已修复」。最小复现见 `tools/repro-assistant-replace-unsupported.mjs`。
+- 新增 `tools/fix-test-assistant-stream.mjs`：为测试夹具里显式构造的 `assistant/message` 事件补齐必填的 `stream: []`。夹具缺失该字段时，用例只在回放或 fork 处失败，失败原因与产品代码无关，会掩盖真正的问题。
+
 - 把 Harness 适配收敛到单一适配层 `dsh-roleplay-rp-host-interface`：插件不再直接 import `@deepseek-ai/dsh-*`，Agent 收件箱与唤醒语义、系统提示节点注册、LLM 消息与错误、压缩基类、工具声明校验和远程服务基类全部经由该包转交，`node tools/adopt-host-interface.mjs --check` 阻止新的直连 import 回流。
 - 新增 `tools/adapt-harness.mjs`：Harness 基线的全部精确锁定由该工具一次性重写，取代逐文件手改；`DS_ROLEPLAY_HARNESS` 暴露当前基线，`--check` 报告漂移。
 - 新增 `tools/repoint-fork.mjs`：把 npm scope、仓库 URL 与安装说明一并指向 fork 所属账号，避免构建产物继续以上游 scope 发布。

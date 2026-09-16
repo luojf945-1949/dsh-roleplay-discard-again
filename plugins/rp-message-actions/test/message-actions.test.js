@@ -481,6 +481,7 @@ test('a historical opening edit forks from the opening turn and requests replay 
   session.append('turn/start', { turn: 1 })
   session.append('step/start', { turn: 1, step: 1 })
   const opening = session.append('assistant/message', {
+    stream: [],
     turn: 1,
     step: 1,
     message: createAssistantMessage({
@@ -546,6 +547,7 @@ test('read-only action metadata joins the active turn before resolving its messa
   harness.agent.whenIdle = async () => {
     joined++
     harness.session.append('assistant/message', {
+      stream: [],
       turn, step: 1,
       message: createAssistantMessage({
         content: [{ type: 'text', text: '收尾后的回复' }],
@@ -773,6 +775,7 @@ function appendTurnContent(session, turn, userContent, narrative) {
   }, { surfaceOp: 'append' })
   const callId = `rp-commit-${turn}`
   const assistant = session.append('assistant/message', {
+    stream: [],
     turn, step: 1,
     message: createAssistantMessage({
       content: [
@@ -844,6 +847,7 @@ function appendInterruptedFailure(session, turn, userText, partialText) {
     }),
   ]
   const assistant = session.append('assistant/message', {
+    stream: [],
     turn,
     step: 1,
     interrupted: true,
@@ -866,6 +870,7 @@ function appendFailedCommitTurn(session, turn, userText, narrative) {
   }, { surfaceOp: 'append' })
   const callId = `rp-commit-invalid-${turn}`
   const assistant = session.append('assistant/message', {
+    stream: [],
     turn, step: 1,
     message: createAssistantMessage({
       content: [
@@ -887,6 +892,7 @@ function appendFailedCommitTurn(session, turn, userText, narrative) {
     }),
   }, { surfaceOp: 'append', sourceEventSeqs: [call.seq] })
   const placeholder = session.append('assistant/message', {
+    stream: [],
     turn, step: 1,
     message: createAssistantMessage({
       content: [{ type: 'text', text: '—' }],
@@ -913,6 +919,7 @@ function appendAssetTurn(session, turn) {
   }, { surfaceOp: 'append', sourceEventSeqs: [assetCall.seq] })
   const callId = `rp-commit-${turn}`
   const assistant = session.append('assistant/message', {
+    stream: [],
     turn, step: 1,
     message: createAssistantMessage({
       content: [{ type: 'text', text: '资料已保存。' }, { type: 'tool-call', id: callId, name: 'rp_commit_turn', arguments: '{}' }],

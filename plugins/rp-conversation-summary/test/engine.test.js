@@ -409,6 +409,7 @@ function appendTurnBody(session, turn, label, padding = 10000) {
     source: { kind: 'user' },
   }), { surfaceOp: 'append' })
   session.append('assistant/message', {
+    stream: [],
     turn,
     step: 1,
     message: createMessage({

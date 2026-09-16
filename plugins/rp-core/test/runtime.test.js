@@ -823,6 +823,7 @@ test('accepts harmless content blocks, blank text, and a commit block before lat
     seq: 0,
     type: 'assistant/message',
     data: {
+      stream: [],
       turn: 1,
       step: 1,
       message: {
@@ -880,6 +881,7 @@ test('Chat retry keeps prose from the latest failed commit even if parent commen
     seq: events.length,
     type: 'assistant/message',
     data: {
+      stream: [],
       turn: 1,
       step: 2,
       message: {
@@ -1389,6 +1391,7 @@ test('conversation Prompt labels an ordinary completed assistant response as non
     content: [{ type: 'text', text: '我们先讨论剧情。' }], source: { kind: 'user' },
   }), { surfaceOp: 'append' })
   session.append('assistant/message', {
+    stream: [],
     turn: 1,
     step: 1,
     message: createAssistantMessage({
@@ -1425,6 +1428,7 @@ test('previews only settled visible dialogue bodies without changing native mode
   const session = Session.create(SessionId('rp-conversation-preview'))
   session.append('turn/start', { turn: 1 })
   session.append('assistant/message', {
+    stream: [],
     turn: 1,
     step: 1,
     message: createAssistantMessage({
@@ -1442,6 +1446,7 @@ test('previews only settled visible dialogue bodies without changing native mode
     source: { kind: 'plugin', plugin: 'rp-core' },
   }), { surfaceOp: 'append' })
   session.append('assistant/message', {
+    stream: [],
     turn: 2,
     step: 1,
     message: createAssistantMessage({
@@ -1462,6 +1467,7 @@ test('previews only settled visible dialogue bodies without changing native mode
     }),
   }, { surfaceOp: 'append' })
   session.append('assistant/message', {
+    stream: [],
     turn: 2,
     step: 2,
     message: createAssistantMessage({
@@ -1488,6 +1494,7 @@ test('previews only settled visible dialogue bodies without changing native mode
     source: { provider: 'mock', model: 'mock' },
   })
   const final = session.append('assistant/message', { turn: 2, step: 3, message: finalMessage }, { surfaceOp: 'append' })
+  stream: [],
   session.append('tool/result', {
     turn: 2,
     step: 3,
@@ -1546,6 +1553,7 @@ test('previews only settled visible dialogue bodies without changing native mode
   }
   delete editedMessage.source.replayState
   const editedEvent = session.append('assistant/message', {
+    stream: [],
     turn: 2,
     step: 3,
     message: editedMessage,
@@ -1563,6 +1571,7 @@ test('previews only settled visible dialogue bodies without changing native mode
     target,
   ])
   session.append('assistant/message', {
+    stream: [],
     turn: 2,
     step: 3,
     message: {
@@ -1964,6 +1973,7 @@ test('Chat Writer receives one flat Prompt and its prose replaces the parent str
     seq: events.length,
     type: 'assistant/message',
     data: {
+      stream: [],
       turn: 1,
       step: 2,
       message: { id: 'assistant-chat-stream', source: { kind: 'model', provider: 'parent-provider', model: 'parent-model' }, content },
