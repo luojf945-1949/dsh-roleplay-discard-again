@@ -233,7 +233,7 @@ test('reroll recovery closes the append-to-inbox crash window and never revives 
   const replacement = structuredClone(pending.data)
   replacement.message.source = { ...replacement.message.source, rpMessageAction: deleteAction }
   abandoned.session.append('assistant/message', replacement, {
-    surfaceOp: { op: 'replace', start: pending.seq, end: pending.seq },
+    surfaceOp: { op: 'replace', startSeq: pending.seq, endSeq: pending.seq },
     sourceEventSeqs: [pending.seq],
   })
   abandoned.agent.followup = message => appendInbox(abandoned, 'next-turn', message, true)
@@ -395,7 +395,7 @@ test('compaction checkpoints do not impersonate the messages they replaced', asy
     content: [{ type: 'text', text: '较早对话摘要' }],
     source: { kind: 'plugin', plugin: 'compact', compactionId: 'compact-1' },
   }, {
-    surfaceOp: { op: 'replace', start: shadowed[0], end: shadowed.at(-1) },
+    surfaceOp: { op: 'replace', startSeq: shadowed[0], endSeq: shadowed.at(-1) },
     sourceEventSeqs: shadowed,
   })
 
@@ -502,7 +502,7 @@ test('a historical opening edit forks from the opening turn and requests replay 
     rpMessageAction: createRpMessageActionMetadata('edit', [target]),
   }
   session.append('assistant/message', replacement, {
-    surfaceOp: { op: 'replace', start: opening.seq, end: opening.seq },
+    surfaceOp: { op: 'replace', startSeq: opening.seq, endSeq: opening.seq },
     sourceEventSeqs: [opening.seq],
   })
 

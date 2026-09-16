@@ -7,7 +7,7 @@ function actionCarrier(seq, operation, sources, target, content = [], extra = {}
   return {
     seq,
     type: 'assistant/message',
-    surfaceOp: { op: 'replace', start: sources[0], end: sources.at(-1) },
+    surfaceOp: { op: 'replace', startSeq: sources[0], endSeq: sources.at(-1) },
     sourceEventSeqs: sources,
     data: {
       turn: 1,
@@ -71,7 +71,7 @@ test('exposes a reusable commit-backed extension projection lifecycle', () => {
   const pruned = foldCommitBackedEntities(assistantEdit.entities, {
     seq: 11,
     type: 'tool/result',
-    surfaceOp: { op: 'replace', start: 9, end: 9 },
+    surfaceOp: { op: 'replace', startSeq: 9, endSeq: 9 },
     sourceEventSeqs: [9],
     data: commitEvent().data,
   }, testExtension)
@@ -86,7 +86,7 @@ test('exposes a reusable commit-backed extension projection lifecycle', () => {
   const compacted = foldCommitBackedEntities(pruned.entities, {
     seq: 12,
     type: 'user/message',
-    surfaceOp: { op: 'replace', start: 10, end: 11 },
+    surfaceOp: { op: 'replace', startSeq: 10, endSeq: 11 },
     sourceEventSeqs: [10, 11],
     data: {
       role: 'user',
@@ -139,7 +139,7 @@ test('surface-owned entities can attach later business events to an earlier owne
   const moved = foldSurfaceOwnedEntities(fold.entities, {
     seq: 7,
     type: 'assistant/message',
-    surfaceOp: { op: 'replace', start: 2, end: 2 },
+    surfaceOp: { op: 'replace', startSeq: 2, endSeq: 2 },
     sourceEventSeqs: [2],
     data: { message: { source: { kind: 'model' } } },
   }, { select })

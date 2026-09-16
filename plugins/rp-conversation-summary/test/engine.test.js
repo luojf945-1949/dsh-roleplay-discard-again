@@ -141,7 +141,7 @@ test('a completed candidate is discarded when its frozen surface prefix has chan
     ...original,
     content: [{ type: 'text', text: '历史已由另一项操作改写' }],
   }, {
-    surfaceOp: { op: 'replace', start: head, end: head },
+    surfaceOp: { op: 'replace', startSeq: head, endSeq: head },
     sourceEventSeqs: [head],
   })
   session.append('turn/start', { turn: 3 })
@@ -308,7 +308,7 @@ test('manual compact meters an existing idle reroll carrier without changing the
     }], { replay: [replay] }),
   }
   const carrier = session.append('assistant/message', carrierData, {
-    surfaceOp: { op: 'replace', start: shadowed[0], end: shadowed.at(-1) },
+    surfaceOp: { op: 'replace', startSeq: shadowed[0], endSeq: shadowed.at(-1) },
     sourceEventSeqs: shadowed,
   })
   assert.throws(
@@ -360,7 +360,7 @@ test('overflow recovery uses the same scoped meter for an existing reroll carrie
     }),
   }
   const carrier = session.append('assistant/message', data, {
-    surfaceOp: { op: 'replace', start: shadowed[0], end: shadowed.at(-1) },
+    surfaceOp: { op: 'replace', startSeq: shadowed[0], endSeq: shadowed.at(-1) },
     sourceEventSeqs: shadowed,
   })
   session.append('turn/start', { turn: 4 })

@@ -26,7 +26,7 @@ test('decodes only successful versioned roleplay commit results', () => {
 test('reads message content and ancestry from native Roleplay action carriers', () => {
   const edit = {
     type: 'assistant/message',
-    surfaceOp: { op: 'replace', start: 3, end: 3 },
+    surfaceOp: { op: 'replace', startSeq: 3, endSeq: 3 },
     sourceEventSeqs: [3],
     data: {
       turn: 1, step: 1,
@@ -45,7 +45,7 @@ test('reads message content and ancestry from native Roleplay action carriers', 
   assert.deepEqual(rpSurfaceReplacementSources(edit), [3])
   assert.deepEqual(rpSurfaceReplacementSources({
     type: 'user/message',
-    surfaceOp: { op: 'replace', start: 3, end: 4 },
+    surfaceOp: { op: 'replace', startSeq: 3, endSeq: 4 },
     sourceEventSeqs: [3, 4],
     data: { id: 'ordinary', role: 'user', content: [], source: { kind: 'plugin', plugin: 'other' } },
   }), [3, 4])
@@ -80,7 +80,7 @@ test('strictly resolves a native model tool call to its assistant owner', () => 
   assert.equal(resolved?.call.seq, 3)
   assert.equal(resolveRpToolCallAssistant(events, 'state-call', 'rp_state_read'), undefined)
   assert.equal(resolveRpToolCallAssistant([...events, structuredClone(events[1])], 'state-call', 'rp_state'), undefined)
-  assert.equal(resolveRpToolCallAssistant([{ ...events[0], surfaceOp: { op: 'replace', start: 1, end: 1 } }, events[1]], 'state-call', 'rp_state'), undefined)
+  assert.equal(resolveRpToolCallAssistant([{ ...events[0], surfaceOp: { op: 'replace', startSeq: 1, endSeq: 1 } }, events[1]], 'state-call', 'rp_state'), undefined)
 })
 
 test('measures complete JSON output in UTF-8 bytes', () => {

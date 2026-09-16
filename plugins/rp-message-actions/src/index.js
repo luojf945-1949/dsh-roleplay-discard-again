@@ -383,7 +383,7 @@ function appendEmptyActionCarrier(agent, resolved, action, shadowed) {
     })
   }
   return agent.session.append('assistant/message', data, {
-    surfaceOp: { op: 'replace', start: shadowed[0], end: shadowed.at(-1) },
+    surfaceOp: { op: 'replace', startSeq: shadowed[0], endSeq: shadowed.at(-1) },
     sourceEventSeqs: shadowed,
   })
 }
@@ -429,7 +429,7 @@ function carrierAssistant(agent, resolved) {
 
 function appendReplacement(session, current, type, data) {
   return session.append(type, data, {
-    surfaceOp: { op: 'replace', start: current.seq, end: current.seq },
+    surfaceOp: { op: 'replace', startSeq: current.seq, endSeq: current.seq },
     sourceEventSeqs: [current.seq],
   })
 }

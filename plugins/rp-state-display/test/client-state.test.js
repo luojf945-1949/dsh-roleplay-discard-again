@@ -73,7 +73,7 @@ test('selects one latest anchor and rolls back through delete/reroll carriers', 
 test('extracts rollback boundaries from public message-action metadata', () => {
   const state = stateDisplayRetractionStart({
     type: 'assistant/message', seq: 50,
-    surfaceOp: { op: 'replace', start: 21, end: 48 },
+    surfaceOp: { op: 'replace', startSeq: 21, endSeq: 48 },
     data: { message: { source: { rpMessageAction: {
       kind: 'rp-agent/message-action', version: 1, operation: 'delete',
       targets: [{ kind: 'message', role: 'assistant', messageId: 'a', turn: 4 }, { kind: 'turn', turn: 5 }],

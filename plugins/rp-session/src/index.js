@@ -518,7 +518,7 @@ function synchronizeOpeningMessage(session, openingText, profile) {
         data.message.source, profile, createRpMessageActionMetadata('delete', [target]),
       )
       session.append('assistant/message', data, {
-        surfaceOp: { op: 'replace', start: current.event.seq, end: current.event.seq },
+        surfaceOp: { op: 'replace', startSeq: current.event.seq, endSeq: current.event.seq },
         sourceEventSeqs: [current.event.seq],
       })
       return
@@ -530,7 +530,7 @@ function synchronizeOpeningMessage(session, openingText, profile) {
       data.message.source, profile, createRpMessageActionMetadata('edit', [target]),
     )
     session.append('assistant/message', data, {
-      surfaceOp: { op: 'replace', start: current.event.seq, end: current.event.seq },
+      surfaceOp: { op: 'replace', startSeq: current.event.seq, endSeq: current.event.seq },
       sourceEventSeqs: [current.event.seq],
     })
     return

@@ -81,7 +81,7 @@ test('retracts edited, deleted, and rerolled reply owners and can reveal the pri
   for (const operation of ['edit', 'delete', 'reroll']) {
     const state = replyOptionsRetractionStart({
       type: 'assistant/message', seq: 50,
-      surfaceOp: { op: 'replace', start: 21, end: 48 },
+      surfaceOp: { op: 'replace', startSeq: 21, endSeq: 48 },
       data: { message: { source: { rpMessageAction: {
         kind: 'rp-agent/message-action', version: 1, operation,
         targets: [{ kind: 'message', role: 'assistant', messageId: 'a', turn: 4 }],

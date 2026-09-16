@@ -106,7 +106,7 @@ test('Harness Session fork restores profile and state at the selected turn bound
         },
       }),
     }, {
-      surfaceOp: { op: 'replace', start: secondAssistant.seq, end: secondCommit.seq },
+      surfaceOp: { op: 'replace', startSeq: secondAssistant.seq, endSeq: secondCommit.seq },
       sourceEventSeqs: [secondAssistant.seq, secondCommit.seq],
     })
     assert.equal(projectState(parent.snapshotEvents()).namespaces.story.value.hp, 9)

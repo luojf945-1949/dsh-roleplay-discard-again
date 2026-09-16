@@ -1550,7 +1550,7 @@ test('previews only settled visible dialogue bodies without changing native mode
     step: 3,
     message: editedMessage,
   }, {
-    surfaceOp: { op: 'replace', start: final.seq, end: final.seq },
+    surfaceOp: { op: 'replace', startSeq: final.seq, endSeq: final.seq },
     sourceEventSeqs: [final.seq],
   })
   const edited = await runtime.previewContextBuild(agent)
@@ -1571,7 +1571,7 @@ test('previews only settled visible dialogue bodies without changing native mode
       source: { ...editedMessage.source, rpMessageAction: deletion },
     },
   }, {
-    surfaceOp: { op: 'replace', start: shadowed[0], end: shadowed.at(-1) },
+    surfaceOp: { op: 'replace', startSeq: shadowed[0], endSeq: shadowed.at(-1) },
     sourceEventSeqs: shadowed,
   })
   assert.equal(session.surface.nodes.includes(editedEvent.seq), false)

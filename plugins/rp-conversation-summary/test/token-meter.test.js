@@ -25,7 +25,7 @@ test('compatibility metering is limited to validated Roleplay message-action ass
     }]),
   }
   const replacement = session.append('assistant/message', data, {
-    surfaceOp: { op: 'replace', start: original.seq, end: original.seq },
+    surfaceOp: { op: 'replace', startSeq: original.seq, endSeq: original.seq },
     sourceEventSeqs: [original.seq],
   })
 
@@ -61,7 +61,7 @@ test('compatibility metering is limited to validated Roleplay message-action ass
     }]),
   }
   const laterReplacement = session.append('assistant/message', laterData, {
-    surfaceOp: { op: 'replace', start: later.seq, end: later.seq },
+    surfaceOp: { op: 'replace', startSeq: later.seq, endSeq: later.seq },
     sourceEventSeqs: [later.seq],
   })
   const readvanced = meter.measure(session)
