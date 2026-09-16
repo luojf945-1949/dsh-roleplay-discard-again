@@ -16,7 +16,7 @@
 
 ```text
 请帮我安装下面的插件：
-dsh plugin --profile web add -w @lutrodev/dsh-roleplay
+dsh plugin --profile web add -w @luojf945-1949/dsh-roleplay
 安装完成后提醒我手动重启。
 ```
 
@@ -25,12 +25,12 @@ Agent 会自动完成安装。安装结束后，手动重启 DeepSeek Harness �
 也可以在终端中手动安装：
 
 ```bash
-dsh plugin --profile web add -w @lutrodev/dsh-roleplay
+dsh plugin --profile web add -w @luojf945-1949/dsh-roleplay
 ```
 
 npm 包已包含运行所需的插件、浏览器端资源、Skills 和示例配置，无需另外克隆源码仓库。
 
-当前兼容组合为 dsh-roleplay `0.1.8` 与 DSH `0.1.2-rc.1`，版本变化详见 [Changelog](CHANGELOG.md)。
+当前兼容组合为 dsh-roleplay `0.1.8` 与 DSH `0.1.5-rc.1`，版本变化详见 [Changelog](CHANGELOG.md)。
 
 ## 使用
 
@@ -60,7 +60,7 @@ npm 包已包含运行所需的插件、浏览器端资源、Skills 和示例配
 环境要求：Node.js `^22.19.0` 或 `>=24.0.0`（推荐使用 [`.nvmrc`](.nvmrc) 中的版本），以及 pnpm `11.23.0`（可由 Corepack 按根 `package.json` 的声明启用）。
 
 ```bash
-git clone https://github.com/lutrodev/dsh-roleplay.git
+git clone https://github.com/luojf945-1949/dsh-roleplay.git
 cd dsh-roleplay
 corepack enable
 pnpm install --frozen-lockfile

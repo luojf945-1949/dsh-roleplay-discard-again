@@ -1,13 +1,13 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { Service } from '@deepseek-ai/cordis'
-import { createUserMessage, HarnessError } from '@deepseek-ai/dsh-llm'
+import { createUserMessage, HarnessError } from 'dsh-roleplay-rp-host-interface'
 import {
   assertObjectJsonSchema,
   assertSupportedJsonSchema,
   defineTool,
   ToolArgsError,
   validateJsonSchemaValue,
-} from '@deepseek-ai/dsh-tools'
+} from 'dsh-roleplay-rp-host-interface'
 import {
   assertCompletedSubagent,
   runFreshStructuredSubagent,

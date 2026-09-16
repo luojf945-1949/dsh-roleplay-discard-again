@@ -3,8 +3,8 @@ import {
   createMessage,
   createUserMessage,
   LlmError,
-} from '@deepseek-ai/dsh-llm'
-import { isCompactCheckpointSource } from '@deepseek-ai/dsh-compaction'
+} from 'dsh-roleplay-rp-host-interface'
+import { isCompactCheckpointSource } from 'dsh-roleplay-rp-host-interface'
 import {
   roleplayAssistantReplyKind,
   roleplayTranscriptMessages,

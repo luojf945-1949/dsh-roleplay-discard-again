@@ -3,7 +3,7 @@ import { mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promise
 import { basename, resolve } from 'node:path'
 import { Service } from '@deepseek-ai/cordis'
 import Schema from '@deepseek-ai/schemastery'
-import { defineTool } from '@deepseek-ai/dsh-tools'
+import { defineTool } from 'dsh-roleplay-rp-host-interface'
 import { activateLore, groupActivatedLore, LORE_SLOT_DEFINITIONS, normalizeLoreBook, serializeLoreBookV3 } from './activation.js'
 
 export { activateLore, classifyLoreEntry, groupActivatedLore, LORE_LEVELS, LORE_SLOT_DEFINITIONS, normalizeLoreBook, serializeLoreBookV3 } from './activation.js'

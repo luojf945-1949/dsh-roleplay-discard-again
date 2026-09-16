@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { Service } from '@deepseek-ai/cordis'
-import { createAssistantMessage } from '@deepseek-ai/dsh-llm/message'
+import { createAssistantMessage } from 'dsh-roleplay-rp-host-interface/message'
 import { SessionId } from '@deepseek-ai/dsh-session'
 import { expandRoleplayMacros } from 'dsh-roleplay-rp-macro/syntax'
 import { normalizeProfile } from 'dsh-roleplay-rp-session'

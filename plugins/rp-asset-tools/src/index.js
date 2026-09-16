@@ -1,4 +1,4 @@
-import { defineTool } from '@deepseek-ai/dsh-tools'
+import { defineTool } from 'dsh-roleplay-rp-host-interface'
 import Schema from '@deepseek-ai/schemastery'
 import { rpAssetBindingIds, RP_ASSET_READ_TOOL, RP_ASSET_TOOL } from 'dsh-roleplay-rp-core'
 import { assetService, createAsset as createThroughAdapter, updateAsset as updateThroughAdapter } from './asset-adapter.js'

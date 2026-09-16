@@ -1,5 +1,5 @@
 {
-  "name": "@lutrodev/dsh-roleplay",
+  "name": "@luojf945-1949/dsh-roleplay",
   "version": "0.1.8",
   "description": "Open-source roleplay plugin suite for DeepSeek Harness",
   "license": "MIT",
@@ -22,7 +22,7 @@
     "dev:config": "node scripts/dev.mjs --dump-config"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh": "0.1.2-rc.1",
+    "@deepseek-ai/dsh": "0.1.5-rc.1",
     "typescript": "6.0.3",
     "yaml": "2.9.0"
   },
@@ -31,11 +31,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lutrodev/dsh-roleplay.git"
+    "url": "git+https://github.com/luojf945-1949/dsh-roleplay.git"
   },
   "bugs": {
-    "url": "https://github.com/lutrodev/dsh-roleplay/issues"
+    "url": "https://github.com/luojf945-1949/dsh-roleplay/issues"
   },
-  "homepage": "https://github.com/lutrodev/dsh-roleplay#readme",
+  "homepage": "https://github.com/luojf945-1949/dsh-roleplay#readme",
   "packageManager": "pnpm@11.23.0"
 }

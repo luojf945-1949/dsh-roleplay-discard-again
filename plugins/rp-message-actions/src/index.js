@@ -1,5 +1,5 @@
 import Schema from '@deepseek-ai/schemastery'
-import { createAssistantMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
+import { createAssistantMessage, createUserMessage } from 'dsh-roleplay-rp-host-interface'
 import {
   createRpMessageActionMetadata,
   currentSurfaceDescendant,

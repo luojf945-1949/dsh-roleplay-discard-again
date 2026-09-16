@@ -1,4 +1,4 @@
-import { isCompactCheckpointSource } from '@deepseek-ai/dsh-compaction'
+import { isCompactCheckpointSource } from 'dsh-roleplay-rp-host-interface'
 
 /** Public Roleplay context source and slot identities. */
 export const CONVERSATION_SUMMARY_SOURCE_ID = 'rp.conversation-summary'

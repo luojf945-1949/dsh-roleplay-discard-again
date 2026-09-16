@@ -1,10 +1,10 @@
 import Schema from '@deepseek-ai/schemastery'
-import BasicCompactionEngine from '@deepseek-ai/dsh-compaction-basic'
+import BasicCompactionEngine from 'dsh-roleplay-rp-host-interface'
 import {
   toolPairingBalancedAfter,
   toolPairingBalancedBefore,
-} from '@deepseek-ai/dsh-compaction'
-import { createUserMessage } from '@deepseek-ai/dsh-llm'
+} from 'dsh-roleplay-rp-host-interface'
+import { createUserMessage } from 'dsh-roleplay-rp-host-interface'
 import { roleplayTranscriptMessages } from 'dsh-roleplay-rp-core/conversation'
 import {
   nativeSummaryInput,
