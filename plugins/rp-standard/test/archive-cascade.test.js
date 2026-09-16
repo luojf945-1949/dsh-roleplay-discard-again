@@ -38,14 +38,17 @@ test('character deletion leaves real Harness live/cold Session logs intact and r
     const coldOwner = await sessionOwner(ctx)
     const live = liveOwner.ctx.sessions.create(SessionId('rp-live-reference'))
     const cold = coldOwner.ctx.sessions.create(SessionId('rp-cold-reference'))
-    appendProfile(live, cardId)
-    appendProfile(cold, cardId)
-    await ctx.sessions.flush(live)
-    await ctx.sessions.flush(cold)
+    await persistSession(ctx, live, cardId)
+    await persistSession(ctx, cold, cardId)
     await coldOwner.fiber.dispose()
 
     assert.equal(ctx.sessions.get(cold.id), undefined)
-    assert.deepEqual((await ctx.sessionPersistence.list()).map(header => header.id).sort(), [cold.id, live.id])
+    // `list()` yields observation records — `{ header, revision, sizeBytes }` —
+    // so the session id belongs to the nested header, not to the record.
+    assert.deepEqual(
+      (await ctx.sessionPersistence.list()).map(snapshot => snapshot.header.id).sort(),
+      [cold.id, live.id],
+    )
 
     const rpCharacterCards = {
       detail: async () => ({
@@ -75,10 +78,12 @@ test('character deletion leaves real Harness live/cold Session logs intact and r
     assert.deepEqual(ctx.workspaceRegistry.archivedSessionIds, [])
     assert.deepEqual(deleted, [`card:${cardId}`, `lore:${lorebookId}`])
 
-    const coldSnapshot = await ctx.sessionPersistence.inspect(cold.id)
-    const liveSnapshot = await ctx.sessionPersistence.inspect(live.id)
-    assert.deepEqual(profileFromEvents(coldSnapshot.events).resources.card, { id: cardId })
-    assert.deepEqual(profileFromEvents(liveSnapshot.events).resources.card, { id: cardId })
+    // Reading a stored session is `open(id, 'read')` + `read()`; the slice
+    // record's `events` is what the profile folder consumes.
+    const coldEvents = await readStoredEvents(ctx, cold.id)
+    const liveEvents = await readStoredEvents(ctx, live.id)
+    assert.deepEqual(profileFromEvents(coldEvents).resources.card, { id: cardId })
+    assert.deepEqual(profileFromEvents(liveEvents).resources.card, { id: cardId })
     assert.ok(ctx.sessions.get(live.id), 'deleting the card must not hide or dispose the live session')
 
     await liveOwner.fiber.dispose()
@@ -94,6 +99,33 @@ async function sessionOwner(ctx) {
   let ownerContext
   const fiber = await ctx.plugin(Object.assign((inner) => { ownerContext = inner }, { inject: ['sessions'] }))
   return { ctx: ownerContext, fiber }
+}
+
+/**
+ * Persist one session the way a deployment's host does.
+ *
+ * `ctx.sessions.flush()` is a durability barrier, not a write trigger: it
+ * dispatches `session/flush` to whichever listeners are registered, and the
+ * storage backend only routes a session's events once a write handle owns it.
+ * Opening that handle is the host's step — the shipped web profile's session
+ * plugin calls `sessionPersistence.create()` for every new session — so a
+ * harness that skips it has nothing on disk to scan.
+ */
+async function persistSession(ctx, session, cardId) {
+  await ctx.sessionPersistence.create({ ...session.header, cwd: process.cwd() })
+  appendProfile(session, cardId)
+  await ctx.sessions.flush(session)
+}
+
+/** Read a stored session's events through the current persistence contract. */
+async function readStoredEvents(ctx, id) {
+  const handle = await ctx.sessionPersistence.open(id, 'read')
+  try {
+    const { events } = await handle.read()
+    return events
+  } finally {
+    await handle.close()
+  }
 }
 
 function appendProfile(session, cardId) {
