@@ -99,8 +99,8 @@ export function replyOptionsRetractionStart(event) {
   const action = messageAction(event)
   return {
     seq: event.seq,
-    replacementStart: event.surfaceOp?.op === 'replace' && Number.isSafeInteger(event.surfaceOp.start)
-      ? event.surfaceOp.start
+    replacementStart: event.surfaceOp?.op === 'replace' && Number.isSafeInteger(event.surfaceOp.startSeq)
+      ? event.surfaceOp.startSeq
       : undefined,
     removedTurns: [...new Set((action?.targets ?? [])
       .map(target => target?.turn)

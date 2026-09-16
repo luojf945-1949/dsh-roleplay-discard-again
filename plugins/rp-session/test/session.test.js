@@ -786,8 +786,8 @@ function fakeSession(events = []) {
       events.push(event)
       if (options.surfaceOp === 'append') surface.nodes.push(event.seq)
       else if (options.surfaceOp?.op === 'replace') {
-        const start = surface.nodes.indexOf(options.surfaceOp.start)
-        const end = surface.nodes.indexOf(options.surfaceOp.end)
+        const start = surface.nodes.indexOf(options.surfaceOp.startSeq)
+        const end = surface.nodes.indexOf(options.surfaceOp.endSeq)
         if (start < 0 || end < start) throw new Error('invalid fake surface replacement')
         surface.nodes.splice(start, end - start + 1, event.seq)
       }

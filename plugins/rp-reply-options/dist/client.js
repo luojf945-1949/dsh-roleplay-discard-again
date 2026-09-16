@@ -6558,7 +6558,7 @@ get: (_target, key) => {
 			const action = messageAction(event);
 			return {
 				seq: event.seq,
-				replacementStart: event.surfaceOp?.op === "replace" && Number.isSafeInteger(event.surfaceOp.start) ? event.surfaceOp.start : void 0,
+				replacementStart: event.surfaceOp?.op === "replace" && Number.isSafeInteger(event.surfaceOp.startSeq) ? event.surfaceOp.startSeq : void 0,
 				removedTurns: [...new Set((action?.targets ?? []).map((target) => target?.turn).filter(Number.isSafeInteger))]
 			};
 		}

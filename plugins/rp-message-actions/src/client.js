@@ -154,8 +154,8 @@ export const suffixActionNodeDefinition = {
     seq: match.event.seq,
     action: decodeRpMessageActionEvent(match.event),
     replacementStart: match.event.surfaceOp?.op === 'replace'
-      && Number.isSafeInteger(match.event.surfaceOp.start)
-      ? match.event.surfaceOp.start
+      && Number.isSafeInteger(match.event.surfaceOp.startSeq)
+      ? match.event.surfaceOp.startSeq
       : undefined,
   }),
   update: context => context.state,
