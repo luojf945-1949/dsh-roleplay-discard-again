@@ -8,7 +8,7 @@
 - **会话创作**：为每个对话选择资料、开场、Prompt 顺序和 Chat／Agent 模式；Writer 可继承全局模型设置，也可按会话覆盖模型与推理强度，Agent 模式还可使用持久终端、文件编辑器和任务子代理。
 - **故事状态**：随对话持久保存角色状态、关系、物品和任务等变量，并安全转换常见 MVU 角色卡配置。
 - **长对话续写**：在上下文压力升高时生成 Roleplay 专用前文总结，并通过原生 checkpoint 保留近期原文、支持后续续写与恢复。
-- **对话体验**：提供快捷回复、提交后非阻断生成的回复选项、消息编辑／删除／重新生成／分支、角色头像、对白高亮、会话变量卡片和紧凑的访问模式按钮；快捷回复可逐项设置插入后的光标位置，回复选项可配置每轮生成 1–5 条以第三人称描述主角接下来对白和／或行为的消息、每条字数上限指导（默认 50）及对应的可选方向关键词，数量与字数只指导轻量结构化子代理，不参与核心提交或回放校验；数字与关键词都不进入实际消息，点击后在成功剧情回复下直接续写下一轮。
+- **对话体验**：提供快捷回复、提交后非阻断生成的回复选项、用户消息的编辑／删除／分支、失败轮次的重新生成、角色头像、对白高亮、会话变量卡片和紧凑的访问模式按钮。**助手消息的编辑、删除与重新生成受当前基线限制暂不可用**，详见上方「当前基线的已知限制」。快捷回复可逐项设置插入后的光标位置，回复选项可配置每轮生成 1–5 条以第三人称描述主角接下来对白和／或行为的消息、每条字数上限指导（默认 50）及对应的可选方向关键词，数量与字数只指导轻量结构化子代理，不参与核心提交或回放校验；数字与关键词都不进入实际消息，点击后在成功剧情回复下直接续写下一轮。
 
 ## 安装方式
 
@@ -16,7 +16,7 @@
 
 ```text
 请帮我安装下面的插件：
-dsh plugin --profile web add -w @lutrodev/dsh-roleplay
+dsh plugin --profile web add -w @luojf945-1949/dsh-roleplay
 安装完成后提醒我手动重启。
 ```
 
@@ -25,12 +25,18 @@ Agent 会自动完成安装。安装结束后，手动重启 DeepSeek Harness �
 也可以在终端中手动安装：
 
 ```bash
-dsh plugin --profile web add -w @lutrodev/dsh-roleplay
+dsh plugin --profile web add -w @luojf945-1949/dsh-roleplay
 ```
 
 npm 包已包含运行所需的插件、浏览器端资源、Skills 和示例配置，无需另外克隆源码仓库。
 
-当前兼容组合为 dsh-roleplay `0.1.8` 与 DSH `0.1.2-rc.1`，版本变化详见 [Changelog](CHANGELOG.md)。
+当前兼容组合为 dsh-roleplay `0.1.8` 与 DSH `0.1.5-rc.1`，版本变化详见 [Changelog](CHANGELOG.md)。
+
+### 当前基线的已知限制
+
+**编辑、删除、重新生成助手消息在当前 DSH 基线上不可用。** 这不是本套件的缺陷，而是 DSH `0.1.5-rc.1` 的会话边界契约自相矛盾：替换 surface 节点必须列出全部被遮蔽节点（`sourceEventSeqs`），而 `assistant/message` 一旦携带该字段就会在写入时抛错——两条规则互斥，因此助手消息无法参与 surface replace。对照之下，用户消息的编辑与删除正常。
+
+`node tools/check-session-contract.mjs` 用真实 `Session` 锁住这条契约，最小复现见 `tools/repro-assistant-replace-unsupported.mjs`。`pnpm run check` 以 `--allow-assistant-replace-gap` 显式放行该缺口：一旦上游修复，门禁会直接报出「缺口已修复」，提醒移除放行参数。受影响的能力见下方「对话体验」中关于消息编辑／删除／重新生成的说明。
 
 ## 使用
 
@@ -60,7 +66,7 @@ npm 包已包含运行所需的插件、浏览器端资源、Skills 和示例配
 环境要求：Node.js `^22.19.0` 或 `>=24.0.0`（推荐使用 [`.nvmrc`](.nvmrc) 中的版本），以及 pnpm `11.23.0`（可由 Corepack 按根 `package.json` 的声明启用）。
 
 ```bash
-git clone https://github.com/lutrodev/dsh-roleplay.git
+git clone https://github.com/luojf945-1949/dsh-roleplay.git
 cd dsh-roleplay
 corepack enable
 pnpm install --frozen-lockfile
@@ -70,10 +76,25 @@ pnpm install --frozen-lockfile
 
 ```bash
 pnpm run verify      # 兼容性、语法、测试和客户端构建
+pnpm test            # 根级与全部 workspace 包的 Node 测试
 pnpm run build       # 生成 Host 与浏览器端产物
 pnpm run dev:config  # 解析完整配置，不启动 Web 服务
 pnpm dev             # 创建隔离 Profile 并启动本地 Web 调试
 ```
+
+当 `pnpm run <script>` 因为依赖状态检查而无法执行时（依赖树不完整、或环境无法托管
+子进程），用下面的命令跑全部 Node 测试：
+
+```bash
+node tools/run-package-tests.mjs                        # 全部包 + 根级测试
+node tools/run-package-tests.mjs rp-core rp-standard    # 只跑指定包
+```
+
+它直接读 `pnpm-workspace.yaml` 枚举包并逐个在各自进程里执行，绕开 pnpm 的脚本层；
+只跑 Node 测试，不含需要 vitest worker 的浏览器端用例。在无法托管子进程的受限环境里
+它会自动加上 `--experimental-test-isolation=none`，并以 TAP 的 `# fail` 计数判定成败
+——那种模式下被父级取消的真实 Agent Loop 用例会把子进程退出码置为非零，但 `# fail`
+仍为 0。具备正常 `spawn` 能力时可用 `--no-isolation-flags` 去掉该参数。
 
 只修改单个插件时，可在对应目录运行 `pnpm run check`、`pnpm test`、`pnpm run build:client` 或 `pnpm run verify`。浏览器联调可用 `pnpm dev -- --port 3090` 指定端口，也可传入 `--skip-build` 或 `--no-watch`。
 

@@ -1,8 +1,8 @@
 import { access, cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
-import { dirname, extname, join, relative, resolve } from 'node:path'
+import { basename, dirname, extname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const PUBLIC_PACKAGE = '@lutrodev/dsh-roleplay'
+const PUBLIC_PACKAGE = '@luojf945-1949/dsh-roleplay'
 const INTERNAL_PREFIX = 'dsh-roleplay-rp-'
 const scriptDir = dirname(fileURLToPath(import.meta.url))
 const projectRoot = resolve(scriptDir, '..')
@@ -62,10 +62,32 @@ function replacePackageNames(value, mapping) {
 
 function transformBundlePatch(value, mapping) {
   const transformed = replacePackageNames(value, mapping)
-  return transformed.replace(
-    /^(\s*name:\s*)(@lutrodev\/dsh-roleplay(?:\/rp-[a-z0-9-]+)?)(\s*)$/gm,
-    (_match, prefix, packageName, suffix) => `${prefix}${JSON.stringify(packageName)}${suffix}`,
+  // Quote the bundle's `name:` values, because a bare `@scope/name` is a YAML
+  // syntax error rather than a string.
+  //
+  // The pattern must match the PUBLIC package name: `replacePackageNames` has
+  // already rewritten every internal name by this point, so searching for the
+  // upstream name here would never match and the published patch file would be
+  // unparseable.
+  const publicName = mappedPublicName(mapping)
+  const pattern = new RegExp(
+    `^([^\\S\\r\\n]*name:[^\\S\\r\\n]*)(${escapeRegExp(publicName)}(?:/rp-[a-z0-9-]+)?)([^\\S\\r\\n]*)$`,
+    'gm',
   )
+  return transformed.replace(pattern, (_match, prefix, packageName, suffix) => `${prefix}${JSON.stringify(packageName)}${suffix}`)
+}
+
+/** The public package name every internal component maps into. */
+function mappedPublicName(mapping) {
+  const names = new Set(mapping.values())
+  const roots = [...names].filter(name => !name.includes('/', name.indexOf('/') + 1))
+  if (roots.length !== 1) throw new Error(`expected exactly one public package name, found ${roots.length}`)
+  return roots[0]
+}
+
+/** Escape a literal for embedding in a regular expression. */
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function transformJson(value, mapping) {
@@ -165,7 +187,7 @@ function mergeDependencies(components, mapping) {
 
 function publicNestedManifest(component, mapping) {
   return {
-    name: `@lutrodev/dsh-roleplay-internal-${component.slug}`,
+    name: `@luojf945-1949/dsh-roleplay-internal-${component.slug}`,
     version: component.manifest.version,
     private: true,
     type: 'module',
@@ -177,7 +199,10 @@ function publicNestedManifest(component, mapping) {
 }
 
 async function buildPackage() {
-  if (dirname(outputDir) !== projectRoot || !outputDir.endsWith('/.npm-package')) {
+  // `outputDir` is built with `join`, so it carries the platform separator.
+  // Comparing against a POSIX-suffixed string would refuse to build on Windows,
+  // where the same directory is named `.npm-package` after a backslash.
+  if (dirname(outputDir) !== projectRoot || basename(outputDir) !== '.npm-package') {
     throw new Error(`refusing to replace unexpected output directory: ${outputDir}`)
   }
 

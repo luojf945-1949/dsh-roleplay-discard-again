@@ -1,5 +1,5 @@
 import { Service } from '@deepseek-ai/cordis'
-import { defineTool } from '@deepseek-ai/dsh-tools'
+import { defineTool } from 'dsh-roleplay-rp-host-interface'
 import Schema from '@deepseek-ai/schemastery'
 import { foldSurfaceOwnedEntities } from 'dsh-roleplay-rp-core/entity-projection'
 import { resolveRpToolCallAssistant } from 'dsh-roleplay-rp-core/protocol'

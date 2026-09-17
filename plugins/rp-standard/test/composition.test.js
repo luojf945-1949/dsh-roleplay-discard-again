@@ -384,6 +384,7 @@ test('imports an MVU+lore card, creates an Actor session and commits atomically'
       effects: [{ kind: 'state.update', namespace, expectedRevision: 0, payload: { changes: [{ op: 'set', path: '/hp', value: 9, reason: '错误的版本号' }] } }],
     }
     agent.session.append('assistant/message', {
+      stream: [],
       turn: 2, step: 1, message: createAssistantMessage({
         source: { provider: 'rp-test-provider', model: 'rp-test-model' }, content: [
         { type: 'text', text: 'An invalid stale-state attempt.' },
@@ -413,6 +414,7 @@ test('imports an MVU+lore card, creates an Actor session and commits atomically'
       }],
     }
     const assistantEvent = agent.session.append('assistant/message', {
+      stream: [],
       turn: 2, step: 1, message: createAssistantMessage({
         source: { provider: 'rp-test-provider', model: 'rp-test-model' }, content: [
         { type: 'text', text: 'The dawn bell rolls across the water.' },

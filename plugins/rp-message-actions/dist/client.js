@@ -7243,7 +7243,7 @@ get: (_target, key) => {
 			start: (_context, match) => ({
 				seq: match.event.seq,
 				action: decodeRpMessageActionEvent(match.event),
-				replacementStart: match.event.surfaceOp?.op === "replace" && Number.isSafeInteger(match.event.surfaceOp.start) ? match.event.surfaceOp.start : void 0
+				replacementStart: match.event.surfaceOp?.op === "replace" && Number.isSafeInteger(match.event.surfaceOp.startSeq) ? match.event.surfaceOp.startSeq : void 0
 			}),
 			update: (context) => context.state,
 			buildViewNode: (context) => context.state?.action === void 0 ? null : {

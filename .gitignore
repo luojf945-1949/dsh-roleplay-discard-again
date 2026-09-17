@@ -8,6 +8,7 @@ Thumbs.db
 
 node_modules/
 .pnpm-store/
+.npm-cache/
 coverage/
 .dsh-dev/
 .npm-package/

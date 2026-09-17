@@ -167,12 +167,15 @@ function messageText(message) {
 }
 
 function streamedText(session, turn, step) {
-  return session.snapshotEvents().flatMap(event => event.type === 'assistant/chunk'
+  // 当前 Harness 不再发出独立的 `assistant/chunk` 事件：模型的流被**内嵌**在该
+  // step 的 `assistant/message` 上（`data.stream`，类型为 `AssistantStreamRecord[]`）。
+  // 文本增量被压缩成 `text-chunks` 记录，因此这里按运行拼接 `texts`。
+  const message = session.snapshotEvents().find(event => event.type === 'assistant/message'
     && event.data.turn === turn
-    && event.data.step === step
-    && event.data.chunk.type === 'text-delta'
-    ? [event.data.chunk.text]
-    : []).join('')
+    && event.data.step === step)
+  const stream = message?.data.stream
+  if (!Array.isArray(stream)) return ''
+  return stream.flatMap(record => record.type === 'text-chunks' ? [...record.texts] : []).join('')
 }
 
 function successfulCommit(session) {

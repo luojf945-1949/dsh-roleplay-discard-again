@@ -54,7 +54,7 @@ test('later pressure input merges the active checkpoint summary with only newer 
       seq: 1,
       type: 'user/message',
       data: { role: 'user', id: 'checkpoint-old', content: [{ type: 'text', text: '<compacted-summary>旧总结仍有效。</compacted-summary>' }], source: { kind: 'plugin', plugin: 'compact', compactionId: 'old' } },
-      surfaceOp: { op: 'replace', start: 9, end: 10 },
+      surfaceOp: { op: 'replace', startSeq: 9, endSeq: 10 },
       sourceEventSeqs: [9, 10],
     },
     { seq: 2, type: 'turn/start', data: { turn: 2 } },

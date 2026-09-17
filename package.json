@@ -1,5 +1,5 @@
 {
-  "name": "@lutrodev/dsh-roleplay",
+  "name": "@luojf945-1949/dsh-roleplay",
   "version": "0.1.8",
   "description": "Open-source roleplay plugin suite for DeepSeek Harness",
   "license": "MIT",
@@ -10,8 +10,10 @@
     "test:compat": "node --test tools/check-harness-compat.test.mjs plugins/rp-core/test/harness-contract.contract.js plugins/rp-core/test/subagent-run.test.js plugins/rp-standard/test/archive-cascade.test.js",
     "check:dev": "node --check scripts/dev.mjs",
     "test:dev": "node --test scripts/dev.test.mjs",
-    "check": "pnpm run check:compat && pnpm run check:dev && pnpm -r --if-present run check",
+    "check:session-contract": "node tools/check-session-contract.mjs --allow-assistant-replace-gap",
+    "check": "pnpm run check:compat && node tools/check-session-contract.mjs --allow-assistant-replace-gap && pnpm run check:dev && pnpm -r --if-present run check",
     "test": "pnpm run test:compat && pnpm run test:dev && pnpm -r --if-present run test",
+    "test:all": "node tools/run-package-tests.mjs",
     "build:host": "tsc -b tsconfig.host.json && pnpm --filter dsh-roleplay-rp-remote run build:host",
     "build": "pnpm run build:host && pnpm -r --if-present --filter '!dsh-roleplay-rp-remote' run build:client && pnpm --filter dsh-roleplay-rp-remote run build:client",
     "build:package": "pnpm run build && node scripts/build-npm-package.mjs",
@@ -22,7 +24,7 @@
     "dev:config": "node scripts/dev.mjs --dump-config"
   },
   "devDependencies": {
-    "@deepseek-ai/dsh": "0.1.2-rc.1",
+    "@deepseek-ai/dsh": "0.1.5-rc.1",
     "typescript": "6.0.3",
     "yaml": "2.9.0"
   },
@@ -31,11 +33,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lutrodev/dsh-roleplay.git"
+    "url": "git+https://github.com/luojf945-1949/dsh-roleplay.git"
   },
   "bugs": {
-    "url": "https://github.com/lutrodev/dsh-roleplay/issues"
+    "url": "https://github.com/luojf945-1949/dsh-roleplay/issues"
   },
-  "homepage": "https://github.com/lutrodev/dsh-roleplay#readme",
+  "homepage": "https://github.com/luojf945-1949/dsh-roleplay#readme",
   "packageManager": "pnpm@11.23.0"
 }

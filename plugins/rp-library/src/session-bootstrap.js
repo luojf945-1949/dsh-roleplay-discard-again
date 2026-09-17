@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { Service } from '@deepseek-ai/cordis'
-import { createAssistantMessage } from '@deepseek-ai/dsh-llm/message'
+import { createAssistantMessage } from 'dsh-roleplay-rp-host-interface/message'
 import { SessionId } from '@deepseek-ai/dsh-session'
 import { expandRoleplayMacros } from 'dsh-roleplay-rp-macro/syntax'
 import { normalizeProfile } from 'dsh-roleplay-rp-session'
@@ -205,9 +205,14 @@ export function buildRoleplaySessionSeed(profile, rawInput, expandedOpening, sta
     envelope('turn/start', 2, startTime + 2, { turn: 1 }),
     envelope('step/start', 3, startTime + 3, { turn: 1, step: 1 }),
     {
-      ...envelope('assistant/message', 4, startTime + 4, { turn: 1, step: 1, message }),
+      // 开场白通过 Session 种子载入，必须满足种子的 assistant/message 契约：
+      // `stream` 是数据类型的必填字段（种子校验会检查它是数组），而
+      // `sourceEventSeqs` 恰恰相反——assistant/message 自带来源流，Harness 的
+      // assertProvenance 只要该字段出现（哪怕是空数组）就在边界抛错。
+      ...envelope('assistant/message', 4, startTime + 4, {
+        turn: 1, step: 1, stream: [], message,
+      }),
       surfaceOp: 'append',
-      sourceEventSeqs: [],
     },
     envelope('step/end', 5, startTime + 5, { turn: 1, step: 1 }),
     envelope('turn/end', 6, startTime + 6, { turn: 1, reason: { kind: 'completed' } }),

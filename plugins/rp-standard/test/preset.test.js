@@ -145,7 +145,8 @@ test('installs an owned Roleplay preset into the Harness user roster', async () 
     assert.match(composition, /id: rp-asset-tools/)
     assert.match(composition, /maxStylesPerSession: 16/)
     assert.match(composition, /customSkillDirs:/)
-    assert.match(composition, new RegExp(join(directory, 'skills').replaceAll('\\', '\\\\')))
+    // 预设把绝对路径规范为正斜杠写出，因此断言也按正斜杠构造，跨平台一致。
+    assert.match(composition, new RegExp(join(directory, 'skills').replaceAll('\\', '/')))
     for (const skill of ['rp-guide-character-card', 'rp-guide-lorebook', 'rp-guide-state', 'rp-guide-persona', 'rp-guide-preset', 'rp-guide-writing-style']) {
       assert.match(await readFile(join(directory, 'skills', skill, 'SKILL.md'), 'utf8'), new RegExp(`name: ${skill}`))
       assert.match(await readFile(join(directory, 'skills', skill, 'agents', 'openai.yaml'), 'utf8'), new RegExp(`\\$${skill}`))

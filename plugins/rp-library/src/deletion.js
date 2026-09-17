@@ -103,7 +103,12 @@ async function readPersistedSessionEvents(persistence, id, signal) {
   const options = signalOptions(signal)
   const handle = await persistence.open(id, 'read', options)
   try {
-    return await handle.read(0, undefined, options)
+    // `read()` resolves to a slice record — the events plus the aliasing state
+    // its producer established — not to the event array itself. Returning the
+    // record here would hand every caller a non-array, so card matching would
+    // silently find nothing and a deleted character could look unreferenced.
+    const { events } = await handle.read(0, undefined, options)
+    return events
   } finally {
     await handle.close()
   }

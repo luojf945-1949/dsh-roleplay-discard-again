@@ -379,7 +379,7 @@ function commitEvent(seq, effect, diagnostics = []) {
 function ordinaryReplacement(seq, sourceSeq) {
   return {
     seq, type: 'tool/result',
-    surfaceOp: { op: 'replace', start: sourceSeq, end: sourceSeq },
+    surfaceOp: { op: 'replace', startSeq: sourceSeq, endSeq: sourceSeq },
     sourceEventSeqs: [sourceSeq],
     data: {},
   }
@@ -394,7 +394,7 @@ function deleteAction(seq, sourceEventSeqs, turn, operation) {
     : undefined
   return {
     seq, type: 'assistant/message',
-    surfaceOp: { op: 'replace', start: sourceEventSeqs[0], end: sourceEventSeqs.at(-1) },
+    surfaceOp: { op: 'replace', startSeq: sourceEventSeqs[0], endSeq: sourceEventSeqs.at(-1) },
     sourceEventSeqs,
     data: {
       turn, step: 1,
@@ -412,7 +412,7 @@ function failedTurnAction(seq, sourceEventSeqs, turn, operation) {
     : undefined
   return {
     seq, type: 'assistant/message',
-    surfaceOp: { op: 'replace', start: sourceEventSeqs[0], end: sourceEventSeqs.at(-1) },
+    surfaceOp: { op: 'replace', startSeq: sourceEventSeqs[0], endSeq: sourceEventSeqs.at(-1) },
     sourceEventSeqs,
     data: {
       turn, step: 1,

@@ -6,6 +6,9 @@ import { Session, SessionId } from '@deepseek-ai/dsh-session'
 import { validateJsonSchemaValue } from '@deepseek-ai/dsh-tools'
 import { createRpMessageActionMetadata } from '../src/conversation.js'
 import { RpRuntime } from '../src/runtime.js'
+// 依赖 assistant/message 的 surface replace：当前 DSH 基线上不可用。跳过是条件式的，
+// 上游放宽契约后该用例会自动恢复执行。
+import { assistantReplaceSkip } from './assistant-replace-support.js'
 
 function commitSchemaBranches(schema) {
   assert.equal(schema.type, undefined)
@@ -823,6 +826,7 @@ test('accepts harmless content blocks, blank text, and a commit block before lat
     seq: 0,
     type: 'assistant/message',
     data: {
+      stream: [],
       turn: 1,
       step: 1,
       message: {
@@ -880,6 +884,7 @@ test('Chat retry keeps prose from the latest failed commit even if parent commen
     seq: events.length,
     type: 'assistant/message',
     data: {
+      stream: [],
       turn: 1,
       step: 2,
       message: {
@@ -1389,6 +1394,7 @@ test('conversation Prompt labels an ordinary completed assistant response as non
     content: [{ type: 'text', text: '我们先讨论剧情。' }], source: { kind: 'user' },
   }), { surfaceOp: 'append' })
   session.append('assistant/message', {
+    stream: [],
     turn: 1,
     step: 1,
     message: createAssistantMessage({
@@ -1406,7 +1412,7 @@ test('conversation Prompt labels an ordinary completed assistant response as non
   await ctx.fiber.dispose()
 })
 
-test('previews only settled visible dialogue bodies without changing native model history', async () => {
+test('previews only settled visible dialogue bodies without changing native model history', { ...assistantReplaceSkip }, async () => {
   const ctx = new Context()
   ctx.provide('systemPrompt', { section() {} })
   ctx.provide('tools', { register() {} })
@@ -1425,6 +1431,7 @@ test('previews only settled visible dialogue bodies without changing native mode
   const session = Session.create(SessionId('rp-conversation-preview'))
   session.append('turn/start', { turn: 1 })
   session.append('assistant/message', {
+    stream: [],
     turn: 1,
     step: 1,
     message: createAssistantMessage({
@@ -1442,6 +1449,7 @@ test('previews only settled visible dialogue bodies without changing native mode
     source: { kind: 'plugin', plugin: 'rp-core' },
   }), { surfaceOp: 'append' })
   session.append('assistant/message', {
+    stream: [],
     turn: 2,
     step: 1,
     message: createAssistantMessage({
@@ -1462,6 +1470,7 @@ test('previews only settled visible dialogue bodies without changing native mode
     }),
   }, { surfaceOp: 'append' })
   session.append('assistant/message', {
+    stream: [],
     turn: 2,
     step: 2,
     message: createAssistantMessage({
@@ -1488,6 +1497,7 @@ test('previews only settled visible dialogue bodies without changing native mode
     source: { provider: 'mock', model: 'mock' },
   })
   const final = session.append('assistant/message', { turn: 2, step: 3, message: finalMessage }, { surfaceOp: 'append' })
+  stream: [],
   session.append('tool/result', {
     turn: 2,
     step: 3,
@@ -1546,11 +1556,12 @@ test('previews only settled visible dialogue bodies without changing native mode
   }
   delete editedMessage.source.replayState
   const editedEvent = session.append('assistant/message', {
+    stream: [],
     turn: 2,
     step: 3,
     message: editedMessage,
   }, {
-    surfaceOp: { op: 'replace', start: final.seq, end: final.seq },
+    surfaceOp: { op: 'replace', startSeq: final.seq, endSeq: final.seq },
     sourceEventSeqs: [final.seq],
   })
   const edited = await runtime.previewContextBuild(agent)
@@ -1563,6 +1574,7 @@ test('previews only settled visible dialogue bodies without changing native mode
     target,
   ])
   session.append('assistant/message', {
+    stream: [],
     turn: 2,
     step: 3,
     message: {
@@ -1571,7 +1583,7 @@ test('previews only settled visible dialogue bodies without changing native mode
       source: { ...editedMessage.source, rpMessageAction: deletion },
     },
   }, {
-    surfaceOp: { op: 'replace', start: shadowed[0], end: shadowed.at(-1) },
+    surfaceOp: { op: 'replace', startSeq: shadowed[0], endSeq: shadowed.at(-1) },
     sourceEventSeqs: shadowed,
   })
   assert.equal(session.surface.nodes.includes(editedEvent.seq), false)
@@ -1964,6 +1976,7 @@ test('Chat Writer receives one flat Prompt and its prose replaces the parent str
     seq: events.length,
     type: 'assistant/message',
     data: {
+      stream: [],
       turn: 1,
       step: 2,
       message: { id: 'assistant-chat-stream', source: { kind: 'model', provider: 'parent-provider', model: 'parent-model' }, content },

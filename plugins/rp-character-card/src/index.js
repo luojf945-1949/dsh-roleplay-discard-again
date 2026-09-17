@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import Schema from '@deepseek-ai/schemastery'
-import { defineTool } from '@deepseek-ai/dsh-tools'
+import { defineTool } from 'dsh-roleplay-rp-host-interface'
 import { assertCardPath } from './character-card.js'
 import { RpCharacterCards } from './service.js'
 

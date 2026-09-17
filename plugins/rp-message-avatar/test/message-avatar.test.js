@@ -108,7 +108,7 @@ function actionCarrier(role, messageId, operation, turn = 1, seq = 20) {
   }
   if (role === 'user') {
     return {
-      seq, type: 'user/message', surfaceOp: { op: 'replace', start: 1, end: 1 },
+      seq, type: 'user/message', surfaceOp: { op: 'replace', startSeq: 1, endSeq: 1 },
       data: {
         id: messageId,
         source: { kind: 'user', rpMessageAction },
@@ -117,7 +117,7 @@ function actionCarrier(role, messageId, operation, turn = 1, seq = 20) {
     }
   }
   return {
-    seq, type: 'assistant/message', surfaceOp: { op: 'replace', start: 1, end: 1 },
+    seq, type: 'assistant/message', surfaceOp: { op: 'replace', startSeq: 1, endSeq: 1 },
     data: {
       turn, step: 1,
       message: {

@@ -353,6 +353,7 @@ function agentWithEvents(events) {
 
 function appendStateToolCall(agent, callId, turn = 1, step = 1) {
   const assistant = agent.session.append('assistant/message', {
+    stream: [],
     turn,
     step,
     message: {

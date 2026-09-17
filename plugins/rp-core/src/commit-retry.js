@@ -1,4 +1,4 @@
-import { HarnessError } from '@deepseek-ai/dsh-llm'
+import { HarnessError } from 'dsh-roleplay-rp-host-interface'
 
 export const MAX_COMMIT_RETRY_PATCHES = 64
 

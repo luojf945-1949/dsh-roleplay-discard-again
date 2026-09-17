@@ -747,7 +747,10 @@ function sessionPersistenceFixture(records, calls = []) {
       return {
         async read(offset, length, readOptions) {
           calls.push({ operation: 'read', id, offset, length, options: readOptions })
-          return record.events
+          // `read()` 解析为**切片记录**（事件数组加上生产者建立的别名状态），
+          // 不是事件数组本身。生产侧按 `const { events } = …` 解构，这里必须
+          // 返回同形状，否则调用方拿到 undefined，冷引用会被静默漏掉。
+          return { events: record.events }
         },
         async close() {
           calls.push({ operation: 'close', id })

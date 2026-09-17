@@ -7,8 +7,11 @@ import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
 import TokenMeter from '@deepseek-ai/dsh-token-meter'
 import { createRpMessageActionMetadata } from 'dsh-roleplay-rp-core/conversation'
 import { roleplayCompactionTokenMeter } from '../src/token-meter.js'
+// 依赖 assistant/message 的 surface replace：当前 DSH 基线上不可用。跳过是条件式的，
+// 上游放宽契约后该用例会自动恢复执行。
+import { assistantReplaceSkip } from './assistant-replace-support.js'
 
-test('compatibility metering is limited to validated Roleplay message-action assistants', () => {
+test('compatibility metering is limited to validated Roleplay message-action assistants', { ...assistantReplaceSkip }, () => {
   const ctx = new Context()
   new SessionProjectionRegistry(ctx)
   const native = new TokenMeter(ctx)
@@ -25,7 +28,7 @@ test('compatibility metering is limited to validated Roleplay message-action ass
     }]),
   }
   const replacement = session.append('assistant/message', data, {
-    surfaceOp: { op: 'replace', start: original.seq, end: original.seq },
+    surfaceOp: { op: 'replace', startSeq: original.seq, endSeq: original.seq },
     sourceEventSeqs: [original.seq],
   })
 
@@ -38,6 +41,7 @@ test('compatibility metering is limited to validated Roleplay message-action ass
   session.append('turn/start', { turn: 2 })
   session.append('step/start', { turn: 2, step: 1 })
   const later = session.append('assistant/message', {
+    stream: [],
     turn: 2,
     step: 1,
     message: createAssistantMessage({
@@ -61,7 +65,7 @@ test('compatibility metering is limited to validated Roleplay message-action ass
     }]),
   }
   const laterReplacement = session.append('assistant/message', laterData, {
-    surfaceOp: { op: 'replace', start: later.seq, end: later.seq },
+    surfaceOp: { op: 'replace', startSeq: later.seq, endSeq: later.seq },
     sourceEventSeqs: [later.seq],
   })
   const readvanced = meter.measure(session)
@@ -85,6 +89,7 @@ function completedAssistantSession(id, text) {
   session.append('turn/start', { turn: 1 })
   session.append('step/start', { turn: 1, step: 1 })
   session.append('assistant/message', {
+    stream: [],
     turn: 1,
     step: 1,
     message: createAssistantMessage({

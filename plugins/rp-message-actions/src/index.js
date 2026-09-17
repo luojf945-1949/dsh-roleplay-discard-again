@@ -1,5 +1,5 @@
 import Schema from '@deepseek-ai/schemastery'
-import { createAssistantMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
+import { createAssistantMessage, createUserMessage } from 'dsh-roleplay-rp-host-interface'
 import {
   createRpMessageActionMetadata,
   currentSurfaceDescendant,
@@ -378,12 +378,12 @@ function appendEmptyActionCarrier(agent, resolved, action, shadowed) {
   data.message.source = { ...data.message.source, rpMessageAction: action }
   delete data.message.source.replayState
   if (shadowed.length === 0) {
-    return agent.session.append('assistant/message', data, {
-      surfaceOp: 'append', sourceEventSeqs: [],
-    })
+    // append 不得携带 sourceEventSeqs：assistant/message 自带来源流，Harness 的
+    // assertProvenance 只要该字段出现（哪怕是空数组）就直接抛错。
+    return agent.session.append('assistant/message', data, { surfaceOp: 'append' })
   }
   return agent.session.append('assistant/message', data, {
-    surfaceOp: { op: 'replace', start: shadowed[0], end: shadowed.at(-1) },
+    surfaceOp: { op: 'replace', startSeq: shadowed[0], endSeq: shadowed.at(-1) },
     sourceEventSeqs: shadowed,
   })
 }
@@ -403,7 +403,7 @@ function appendAdditionalFailedTurnMarkers(agent, action) {
       turn: target.turn,
       step: 1,
       message,
-    }, { surfaceOp: 'append', sourceEventSeqs: [] })
+    }, { surfaceOp: 'append' })
   }
 }
 
@@ -422,6 +422,9 @@ function carrierAssistant(agent, resolved) {
     data: {
       turn: resolved.turn.start.data.turn,
       step: lastTurnStep(resolved.turn.events) ?? 1,
+      // `stream` 是 assistant/message 的必填字段：append 时不校验，但 Session
+      // 回放与分支会校验它必须是数组，缺失会让整段日志无法重建。
+      stream: [],
       message,
     },
   }
@@ -429,7 +432,7 @@ function carrierAssistant(agent, resolved) {
 
 function appendReplacement(session, current, type, data) {
   return session.append(type, data, {
-    surfaceOp: { op: 'replace', start: current.seq, end: current.seq },
+    surfaceOp: { op: 'replace', startSeq: current.seq, endSeq: current.seq },
     sourceEventSeqs: [current.seq],
   })
 }
