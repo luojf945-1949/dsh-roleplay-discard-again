@@ -28,6 +28,7 @@ export { DS_ROLEPLAY_HARNESS, HARNESS_VERSIONS_ARE_EXACT } from './version.js'
 
 // Harness LLM surface: building transcript messages and classifying failures.
 export {
+  BlockAssembler,
   createAssistantMessage,
   createMessage,
   createSystemMessage,

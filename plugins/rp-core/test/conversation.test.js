@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { createAssistantMessage, createUserMessage } from '@deepseek-ai/dsh-llm'
+import { createAssistantMessage, createToolResultMessage, createUserMessage, ToolCallId } from '@deepseek-ai/dsh-llm'
 import { Session, SessionId } from '@deepseek-ai/dsh-session'
 import {
   roleplayAssistantReplyKind,
@@ -114,6 +114,15 @@ test('reply classification trusts successful commits and selected opening proven
     turn: 3,
     step: 1,
     error: { code: 'INVALID_ARGS' },
+    // The Harness requires an errored `tool/result` to carry a message whose
+    // first content block is marked as an error, so failure and success are
+    // distinguishable from the record alone. `createToolResultMessage` is what
+    // puts `isError` on that block.
+    message: createToolResultMessage({
+      callId: ToolCallId('commit-failed'),
+      content: [{ type: 'text', text: 'INVALID_ARGS' }],
+      isError: true,
+    }),
     meta: {
       kind: 'rp-agent/turn-commit', version: 2, runId: 'run-failed', turn: 3,
       assistant: { seq: discussion.seq, messageId: discussion.data.message.id },
@@ -133,6 +142,8 @@ function appendAssistant(session, turn, step, text) {
   return session.append('assistant/message', {
     turn,
     step,
+    // `stream` 是 assistant/message 的必填字段：append 不校验，但回放与分支会校验。
+    stream: [],
     message: createAssistantMessage({
       content: [{ type: 'text', text }],
       source: { provider: 'mock', model: 'mock' },

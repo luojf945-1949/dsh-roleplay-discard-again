@@ -7,8 +7,11 @@ import SessionProjectionRegistry from '@deepseek-ai/dsh-session-projection'
 import TokenMeter from '@deepseek-ai/dsh-token-meter'
 import { createRpMessageActionMetadata } from 'dsh-roleplay-rp-core/conversation'
 import { roleplayCompactionTokenMeter } from '../src/token-meter.js'
+// 依赖 assistant/message 的 surface replace：当前 DSH 基线上不可用。跳过是条件式的，
+// 上游放宽契约后该用例会自动恢复执行。
+import { assistantReplaceSkip } from './assistant-replace-support.js'
 
-test('compatibility metering is limited to validated Roleplay message-action assistants', () => {
+test('compatibility metering is limited to validated Roleplay message-action assistants', { ...assistantReplaceSkip }, () => {
   const ctx = new Context()
   new SessionProjectionRegistry(ctx)
   const native = new TokenMeter(ctx)

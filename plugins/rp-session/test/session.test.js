@@ -16,6 +16,9 @@ import {
   isSelectedOpeningMessage,
   normalizeProfile,
 } from '../src/index.js'
+// 依赖 assistant/message 的 surface replace：当前 DSH 基线上不可用。跳过是条件式的，
+// 上游放宽契约后这些用例会自动恢复执行。
+import { assistantReplaceSkip } from './assistant-replace-support.js'
 
 test('selected opening provenance is a stable native assistant-message discriminator', () => {
   const opening = {
@@ -566,7 +569,7 @@ test('edits the persisted opening with CAS and enforces the complete character l
   await harness.ctx.fiber.dispose()
 })
 
-test('opening edits replay as native assistant replacements on the Session surface', async () => {
+test('opening edits replay as native assistant replacements on the Session surface', { ...assistantReplaceSkip }, async () => {
   const ctx = new Context()
   ctx.provide('rpRuntime', {
     registerContextSource() {}, registerRunGuard() {}, registerSessionProfileProvider() {},

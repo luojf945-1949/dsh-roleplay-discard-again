@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { lstat, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
-import { dirname, resolve } from 'node:path'
+import { dirname, isAbsolute, resolve } from 'node:path'
 import Schema from '@deepseek-ai/schemastery'
 import { roleplayPersonaText } from 'dsh-roleplay-rp-core/prompts'
 import { normalizeInitialSubagents } from 'dsh-roleplay-rp-subagent-manager'
@@ -161,6 +161,18 @@ function validateConfig(config) {
  * Bare package names are resolved by the Harness preset mount from the active profile.
  * @param {Record<string, unknown>} config
  */
+/**
+ * 把绝对路径占位符的值规范为正斜杠形式。
+ *
+ * 只处理绝对路径字符串：其余占位符（布尔、数字、关键词数组）原样返回，避免误伤。
+ *
+ * @param {unknown} value 占位符的值。
+ * @returns {unknown} 规范后的值。
+ */
+function normalizePathValue(value) {
+  return typeof value === 'string' && isAbsolute(value) ? value.replaceAll('\\', '/') : value
+}
+
 async function buildPresetFiles(config, presetDirectory, features) {
   let composition = await readFile(TEMPLATE_URL, 'utf8')
   for (const [placeholder, packageName] of Object.entries(MODULES)) {
@@ -222,7 +234,10 @@ async function buildPresetFiles(config, presetDirectory, features) {
   }
   for (const [placeholder, value] of Object.entries(values)) {
     if (!composition.includes(placeholder)) throw new Error(`rp-standard: preset template is missing ${placeholder}`)
-    composition = composition.replaceAll(placeholder, JSON.stringify(value))
+    // 路径统一写成正斜杠再序列化。`JSON.stringify` 会把 Windows 的反斜杠转义成
+    // 双反斜杠，生成 `"C:\\Users\\…"`；那不但在 YAML 里多一层转义，也让任何按
+    // 单反斜杠比对该路径的消费者失配。正斜杠在 YAML 与文件系统两侧都成立。
+    composition = composition.replaceAll(placeholder, JSON.stringify(normalizePathValue(value)))
   }
   if (!composition.endsWith('\n')) composition += '\n'
   const metadata = await readFile(METADATA_URL, 'utf8')
