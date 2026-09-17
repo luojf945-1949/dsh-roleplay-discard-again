@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process'
-import { readdirSync, readFileSync } from 'node:fs'
+import { closeSync, openSync, readdirSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { basename, dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parse as parseYaml } from 'yaml'
@@ -204,24 +205,58 @@ function runPeerDependencyCheck() {
   const npmExecPath = process.env.npm_execpath
   const usesPnpm = typeof npmExecPath === 'string'
     && basename(npmExecPath).toLowerCase().includes('pnpm')
-  const result = usesPnpm
-    ? spawnSync(process.execPath, [npmExecPath, ...args], peerCheckOptions())
-    : spawnSync('pnpm', args, { ...peerCheckOptions(), shell: process.platform === 'win32' })
+  const capture = createOutputCapture()
+  let result
+  try {
+    result = usesPnpm
+      ? spawnSync(process.execPath, [npmExecPath, ...args], peerCheckOptions(capture.fd))
+      : spawnSync('pnpm', args, { ...peerCheckOptions(capture.fd), shell: process.platform === 'win32' })
+  } finally {
+    capture.close()
+  }
+  const output = capture.read().trim()
   if (result.error !== undefined) {
     return { detail: result.error.message, ok: false }
   }
-  const output = `${result.stderr ?? ''}\n${result.stdout ?? ''}`.trim()
   return {
     detail: output.replaceAll(/\s*\n\s*/g, ' | '),
     ok: result.status === 0,
   }
 }
 
-function peerCheckOptions() {
+/**
+ * 把子进程输出落到临时文件而非管道。
+ *
+ * 受限环境会拒绝管道 stdio（`spawn EPERM`），而文件句柄放行——`run-package-tests.mjs`
+ * 用的是同一手法。pnpm 的 peer 图检查本身仍照常真实执行，成败仍取子进程退出码，
+ * 只是失败时的原始输出改为从文件读回，不再经 stdout/stderr 管道。
+ *
+ * @returns {{ fd: number, close: () => void, read: () => string }} 捕获句柄。
+ */
+function createOutputCapture() {
+  const logPath = join(tmpdir(), `dsh-check-harness-compat-${process.pid}.log`)
+  const fd = openSync(logPath, 'w')
+  return {
+    fd,
+    close() {
+      closeSync(fd)
+    },
+    read() {
+      try {
+        return readFileSync(logPath, 'utf8')
+      } catch {
+        return ''
+      } finally {
+        rmSync(logPath, { force: true })
+      }
+    },
+  }
+}
+
+function peerCheckOptions(fd) {
   return {
     cwd: projectRoot,
-    encoding: 'utf8',
     env: process.env,
-    stdio: ['ignore', 'pipe', 'pipe'],
+    stdio: ['ignore', fd, fd],
   }
 }
