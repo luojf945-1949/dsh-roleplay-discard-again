@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import test from 'node:test'
+import { parse as parseYaml } from 'yaml'
 
 import {
   discoverWorkspacePackages,
@@ -75,13 +77,40 @@ test('发现整套插件和共享基础 package', () => {
   const packages = discoverWorkspacePackages()
   const names = packages.map(workspacePackage => workspacePackage.name)
   assert.equal(new Set(names).size, names.length)
-  assert.equal(names.length, 25)
+  // 期望集合来自工作区声明与目录本身，而不是硬编码数量：适配层新增
+  // `packages/rp-host-interface` 后，写死的 25 静默过期，而该用例当时正被父级取消
+  // 掩盖（`node --test --experimental-test-isolation=none scripts/dev.test.mjs` 可见）。
+  // 现在断言「发现的集合 == 工作区声明的集合」，新增或删除 workspace package 都会自动跟随，
+  // 同时仍能挡住漏发现、重复名、清单与目录不一致这几类真实回归。
+  const declared = []
+  for (const group of declaredWorkspaceGroups()) {
+    for (const entry of readdirSync(join(projectRoot, group), { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue
+      const manifestPath = join(projectRoot, group, entry.name, 'package.json')
+      if (!existsSync(manifestPath)) continue
+      declared.push(JSON.parse(readFileSync(manifestPath, 'utf8')).name)
+    }
+  }
+  assert.deepEqual(names, [...declared].sort())
+  assert.ok(names.length > 0)
   assert.ok(names.includes('dsh-roleplay-rp-compact-access-mode'))
   assert.ok(names.includes('dsh-roleplay-rp-conversation-summary'))
   assert.ok(names.includes('dsh-roleplay-rp-feature-manager'))
+  assert.ok(names.includes('dsh-roleplay-rp-host-interface'))
   assert.ok(names.includes('dsh-roleplay-rp-quick-replies'))
   assert.ok(names.includes('dsh-roleplay-rp-reply-options'))
   assert.ok(names.includes('dsh-roleplay-rp-remote'))
   assert.ok(names.includes('dsh-roleplay-rp-state-display'))
   assert.ok(names.includes('dsh-roleplay-rp-ui'))
 })
+
+/** `pnpm-workspace.yaml` 声明的 `group/*` 工作区分组，按声明顺序返回。 */
+function declaredWorkspaceGroups() {
+  const workspace = parseYaml(readFileSync(join(projectRoot, 'pnpm-workspace.yaml'), 'utf8'))
+  const groups = []
+  for (const pattern of workspace.packages ?? []) {
+    const [group, child] = String(pattern).split('/')
+    if (child === '*' && !groups.includes(group)) groups.push(group)
+  }
+  return groups
+}

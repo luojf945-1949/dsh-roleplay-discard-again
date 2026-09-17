@@ -86,13 +86,37 @@ export async function dispatchMessageAction(
   try {
     return await maintenance
   } catch (error) {
-    if (error?.code !== undefined) throw error
-    throw coded(
-      'MESSAGE_OPERATION_FAILED',
-      error instanceof Error ? error.message : 'The requested message action was rejected.',
+    throw messageActionFailure(error)
+  }
+}
+
+/**
+ * 当前 Harness 拒绝「助手消息作 replace 载体」时的固定报错原文。
+ *
+ * 这是**能力缺失**（见 `docs/known-limitations.md` LIM-1）：replace 必须列出被遮蔽节点，
+ * 而 `assistant/message` 一旦携带 `sourceEventSeqs` 就抛错，两条规则互斥。它不是本插件的
+ * 写入 bug，所以这里不做能力探测、也不降级写入，只把 Harness 的拒绝翻译成产品级失败码。
+ * 上游放宽 provenance 规则后这条报错会消失，同一条路径立即可用，无需改代码。
+ */
+const ASSISTANT_REPLACE_REJECTION = /assistant\/message embeds its source stream and cannot carry sourceEventSeqs/
+
+/**
+ * 把一次操作失败翻译成稳定的产品级失败码。
+ *
+ * @param {unknown} error 抛出的错误。
+ * @returns {Error} 带 `code` 的错误（保留原始 `cause`）。
+ */
+function messageActionFailure(error) {
+  if (error?.code !== undefined) return error
+  const message = error instanceof Error ? error.message : String(error)
+  if (ASSISTANT_REPLACE_REJECTION.test(message)) {
+    return coded(
+      'ASSISTANT_REPLACE_UNAVAILABLE',
+      'The Harness baseline rejects assistant/message replacement, so this message action cannot be recorded.',
       error,
     )
   }
+  return coded('MESSAGE_OPERATION_FAILED', message, error)
 }
 
 /** Whether the latest native turn already has its durable closing boundary. */
@@ -827,6 +851,7 @@ function codeFor(error) {
     'INVALID_REQUEST', 'INVALID_CONTENT', 'LIMIT_EXCEEDED', 'UNSUPPORTED_MESSAGE',
     'SESSION_RUNNING', 'SESSION_NOT_FOUND', 'NOT_RP_SESSION', 'MESSAGE_NOT_FOUND',
     'REROLL_UNAVAILABLE', 'SERVICE_UNAVAILABLE', 'MESSAGE_OPERATION_FAILED',
+    'ASSISTANT_REPLACE_UNAVAILABLE',
     'REVISION_CONFLICT', 'CARD_REQUIRED', 'PROFILE_TOO_LARGE', 'COMMAND_FAILED',
   ].includes(error?.code) ? error.code : 'MESSAGE_OPERATION_FAILED'
 }

@@ -6667,6 +6667,7 @@ get: (_target, key) => {
 			if (code === "REROLL_UNAVAILABLE") return "只能重新生成当前对话中最后一条可恢复的消息。";
 			if (code === "SESSION_RUNNING") return "回复还在生成或收尾，请完成后再试。";
 			if (code === "UNSUPPORTED_MESSAGE") return "这条消息包含图片、附件或无法重放的内容，暂时不能重新生成。";
+			if (code === "ASSISTANT_REPLACE_UNAVAILABLE") return "当前版本还不支持改写已经生成的回复，编辑、删除和重新生成暂时无法完成；应用更新后可以恢复。";
 			if (code === "INVALID_CONTENT") return "内容不能为空。";
 			if (code === "LIMIT_EXCEEDED") return "内容太长，请缩短后再保存。";
 			if (code === "NOT_RP_SESSION") return "这项操作只适用于角色扮演对话。";

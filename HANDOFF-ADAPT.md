@@ -80,7 +80,7 @@ git push -u origin main
    于是 `name: @scope/pkg` 未加引号 —— YAML 语法错误，`dsh --profile web --dump-config` 直接崩。
    已改为匹配公开包名。
 
-## 5. 已知未解决：会话持久化在新版 DSH 上是坏的
+## 5. 会话持久化在新版 DSH 上为什么"不写盘"（已解决，见 LIM-2）
 
 同一份测试文件、纯净 0.1.2-rc.1 基线 vs 新版对照：
 
@@ -89,14 +89,29 @@ git push -u origin main
 | `flush()` 后写盘 | 写 `session.jsonl` | 不写 | 不写 |
 | `sessionPersistence.list()` | 1 条 | 0 条 | 0 条 |
 
-根因：`ctx.sessions.flush()` 现在只收集 `session/flush` 监听器
-（`collectSessionCallbacks`），JSONL 持久化插件的监听器没有参与，`flush()` 返回 `true` 却什么都不写。
+根因：`ctx.sessions.flush()` 是**耐久屏障**，不是写盘触发器——它把 `session/flush` 派发给
+已注册的监听器，而 JSONL 后端只在某个写句柄拥有该会话时才路由事件。旧测试假设
+「`flush()` 会自己开启写句柄」，缺的是宿主的那一步（`dsh-agent-loop` 在会话启动时调用
+`sessionPersistence.create(...)`）。真实部署因此不受影响。
 
-影响 1 个测试：`plugins/rp-standard/test/archive-cascade.test.js`。
-另 1 个失败（`structured child timeout`）在纯净基线上同样失败，与本次适配无关。
+仓库侧不再需要改 `rp-library` 的持久化读写路径：`plugins/rp-standard/test/archive-cascade.test.js`
+已按宿主生命周期先 `ctx.sessionPersistence.create(...)` 再 `flush()`，恢复真实执行并全绿。
 
-修它需要改 `rp-library` 的持久化读写路径（`list()` 语义已变，且 `open(id,'read')`
-在 0.1.2 上根本不存在），属于业务逻辑改动，未擅自处理。
+```bash
+node --test --experimental-test-isolation=none plugins/rp-standard/test/archive-cascade.test.js
+# => # tests 1 | # pass 1 | # fail 0
+```
+
+另 1 个失败（`structured child timeout`）需要真实子进程托管，在本机受限环境下被父级取消，
+与适配无关；普通开发机 / CI 上直接通过。
+
+## 5.1 仍未关闭的缺口都登记在 `docs/known-limitations.md`
+
+`assistant/message` 的 surface replace 在 `0.1.5-rc.1` 上无解（replace 必须列出被遮蔽节点，
+而 `assistant/message` 一旦携带 `sourceEventSeqs` 就抛错），因此编辑助手回复、删除、
+重新生成等消息操作不可用，31 个用例条件跳过。完整证据、影响面、可决策选项与自动恢复条件见
+`docs/known-limitations.md` 的 LIM-1；跳过登记表也在同一文件，并由
+`node tools/check-test-skips.mjs` 与 `node tools/run-package-tests.mjs` 双向校验。
 
 ## 6. 已改名的包名不可提交的部分
 

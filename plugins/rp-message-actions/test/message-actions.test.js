@@ -27,7 +27,45 @@ import {
 } from '../src/client-state.js'
 // 依赖 assistant/message 的 surface replace：当前 DSH 基线上不可用。跳过是条件式的，
 // 上游放宽契约后这些用例会自动恢复执行。
-import { assistantReplaceSkip } from './assistant-replace-support.js'
+import { assistantReplaceSkip, supportsAssistantReplace } from './assistant-replace-support.js'
+
+test('assistant message actions either complete or fail with a designed code and no partial write', async t => {
+  const harness = await createHarness(t)
+  const first = locateRoleplayTurn(harness.session, 1)
+  const last = locateRoleplayTurn(harness.session, 2)
+  const before = harness.session.snapshotEvents().length
+
+  // 编辑助手正文、删除消息、重新生成都要经过「用助手节点做 replace」这一步。
+  // 当前基线拒绝该写入（见 docs/known-limitations.md LIM-1），产品必须给出设计过的失败码，
+  // 且不得留下半写日志；上游放宽 provenance 后，同一个用例会自动断言它们真实成功。
+  // 重新生成只对最后一条可恢复消息开放，因此用第二层作为目标。
+  const attempts = [
+    ['edit', assistantTarget(first), { content: '改写后的正文' }],
+    ['delete', userTarget(first), {}],
+    ['reroll', assistantTarget(last), {}],
+  ]
+  const outcomes = []
+  for (const [endpoint, target, extra] of attempts) {
+    const outcome = await action(harness, endpoint, target, extra).then(
+      () => 'completed',
+      error => error?.code,
+    )
+    outcomes.push(outcome)
+  }
+
+  if (supportsAssistantReplace) {
+    assert.deepEqual(outcomes, ['completed', 'completed', 'completed'])
+    return
+  }
+  assert.deepEqual(outcomes, [
+    'ASSISTANT_REPLACE_UNAVAILABLE',
+    'ASSISTANT_REPLACE_UNAVAILABLE',
+    'ASSISTANT_REPLACE_UNAVAILABLE',
+  ])
+  assert.equal(harness.session.snapshotEvents().length, before)
+  assert.deepEqual(harness.followups, [])
+  assert.deepEqual(harness.injections, [])
+})
 
 test('native edits keep message identity, tool calls and committed effects', { ...assistantReplaceSkip }, async t => {
   const harness = await createHarness(t)
