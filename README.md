@@ -76,10 +76,25 @@ pnpm install --frozen-lockfile
 
 ```bash
 pnpm run verify      # 兼容性、语法、测试和客户端构建
+pnpm test            # 根级与全部 workspace 包的 Node 测试
 pnpm run build       # 生成 Host 与浏览器端产物
 pnpm run dev:config  # 解析完整配置，不启动 Web 服务
 pnpm dev             # 创建隔离 Profile 并启动本地 Web 调试
 ```
+
+当 `pnpm run <script>` 因为依赖状态检查而无法执行时（依赖树不完整、或环境无法托管
+子进程），用下面的命令跑全部 Node 测试：
+
+```bash
+node tools/run-package-tests.mjs                        # 全部包 + 根级测试
+node tools/run-package-tests.mjs rp-core rp-standard    # 只跑指定包
+```
+
+它直接读 `pnpm-workspace.yaml` 枚举包并逐个在各自进程里执行，绕开 pnpm 的脚本层；
+只跑 Node 测试，不含需要 vitest worker 的浏览器端用例。在无法托管子进程的受限环境里
+它会自动加上 `--experimental-test-isolation=none`，并以 TAP 的 `# fail` 计数判定成败
+——那种模式下被父级取消的真实 Agent Loop 用例会把子进程退出码置为非零，但 `# fail`
+仍为 0。具备正常 `spawn` 能力时可用 `--no-isolation-flags` 去掉该参数。
 
 只修改单个插件时，可在对应目录运行 `pnpm run check`、`pnpm test`、`pnpm run build:client` 或 `pnpm run verify`。浏览器联调可用 `pnpm dev -- --port 3090` 指定端口，也可传入 `--skip-build` 或 `--no-watch`。
 
